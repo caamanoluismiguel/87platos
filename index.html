@@ -3308,23 +3308,32 @@
             modal.style.display = 'flex';
         }
 
-        function closeM() { document.getElementById('muniModal').style.display = 'none'; }
-        // Este código conecta los 87 municipios del SVG con tus ventanas emergentes
+       // Conexión Inteligente: Mapa SVG + Base de Datos de 87 Platos
 document.querySelectorAll('#svg-container path').forEach(municipio => {
     municipio.addEventListener('click', function() {
-        // Obtenemos el nombre del municipio desde el atributo 'title' o 'id' del SVG de Wikipedia
-        const nombreMuni = this.getAttribute('title') || this.id; 
+        // 1. Intentamos sacar el nombre de la etiqueta <title> (estándar de Wikipedia)
+        let nombreMuni = "";
+        const titleTag = this.querySelector('title');
         
-        if (nombreMuni) {
-            // Buscamos la info en nuestra base de datos
-            const info = dataMunicipios.find(d => d.n === nombreMuni) || 
-                         { p: "Plato Regional", d: "Sabor por descubrir." };
+        if (titleTag) {
+            nombreMuni = titleTag.textContent.trim();
+        } else {
+            // Si no hay <title>, probamos con atributos comunes
+            nombreMuni = this.getAttribute('title') || this.getAttribute('inkscape:label') || "";
+        }
+
+        // 2. Si logramos encontrar un nombre, abrimos el modal completo
+        if (nombreMuni && nombreMuni !== "") {
+            // Buscamos la info en nuestra base de datos (ignorando mayúsculas/minúsculas)
+            const info = dataMunicipios.find(d => d.n.toLowerCase() === nombreMuni.toLowerCase()) || 
+                         { p: "Plato Típico por Definir", d: "Un secreto gastronómico esperando por Darwin Durán.", f: "default.jpg" };
             
-            // Abrimos la ventana con el plato y el botón de Google Maps
+            // 3. Abrimos el modal con TODO lo prometido
             openM(nombreMuni, info);
+        } else {
+            console.log("No se detectó nombre en este elemento:", this.id);
         }
     });
 });
-    </script>
 </body>
 </html>
