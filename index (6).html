@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Vuelta a Santander | 87 Platos</title>
+    <style>
+        :root {
+            --verde: #1a5e3a; /* */
+            --amarillo: #f4b400; /* */
+            --blanco: #ffffff;
+            --gris: #f4f4f4;
+        }
+
+        body { font-family: 'Montserrat', sans-serif; margin: 0; background: var(--gris); color: #333; }
+
+        /* HEADER & BRANDING */
+        .header { background: var(--blanco); padding: 20px; text-align: center; border-bottom: 5px solid var(--verde); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .logo { max-width: 220px; margin-bottom: 10px; }
+
+        /* SECCIÓN DEL MAPA INTERACTIVO */
+        .map-section { max-width: 900px; margin: 20px auto; padding: 20px; background: white; border-radius: 20px; text-align: center; }
+        #svg-container { width: 100%; height: auto; cursor: pointer; }
+        /* Efecto hover para el mapa de Wikipedia */
+        #svg-container path:hover { fill: var(--amarillo) !important; transition: 0.3s; }
+
+        /* GRID DE LOS 87 MUNICIPIOS */
+        .grid-container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        .municipios-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
+        .muni-card { 
+            background: white; border-radius: 15px; padding: 15px; text-align: center; 
+            border: 2px solid transparent; transition: 0.3s; cursor: pointer; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .muni-card:hover { border-color: var(--amarillo); transform: translateY(-5px); }
+        .muni-card h4 { color: var(--verde); margin: 0; font-size: 0.9rem; }
+
+        /* VENTANA MODAL GASTRONÓMICA */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: white; width: 100%; max-width: 500px; border-radius: 25px; padding: 30px; text-align: center; position: relative; }
+        .plato-foto { width: 100%; height: 200px; background: #ddd; border-radius: 15px; object-fit: cover; margin-bottom: 15px; }
+        .btn-ruta { 
+            background: var(--amarillo); color: white; padding: 15px 30px; border-radius: 50px; 
+            text-decoration: none; font-weight: bold; display: inline-block; margin-top: 20px;
+            box-shadow: 0 8px 15px rgba(244,180,0,0.4); transition: 0.3s;
+        }
+        .btn-ruta:hover { transform: scale(1.05); background: #d39e00; }
+
+        /* FOOTER ALIADOS */
+        .footer { background: var(--blanco); padding: 40px; margin-top: 60px; text-align: center; border-top: 1px solid #ddd; }
+        .aliados { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; opacity: 0.7; }
+        .aliado-tag { font-weight: bold; font-size: 0.7rem; color: #666; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <img src="130100.jpg" alt="Logo Santander 87 Platos" class="logo">
+    </header>
+
+    <div class="map-section">
+        <h2 style="color: var(--verde)">Explora el Mapa Político</h2>
+        <p>Toca tu municipio para conocer su sabor</p>
+        <div id="svg-container">
+            <p style="color: #999; font-size: 0.8rem;">(Aquí aparecerá el mapa de Wikipedia una vez cargado)</p>
+        </div>
+    </div>
+
+    <div class="grid-container">
+        <div class="municipios-grid" id="mainGrid"></div>
+    </div>
+
+    <div class="modal" id="muniModal">
+        <div class="modal-content">
+            <span style="position:absolute; right:25px; top:20px; cursor:pointer; font-size:24px" onclick="closeM()">×</span>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p style="margin-bottom: 20px; font-size: 0.7rem;">ESTA AVENTURA ES GRACIAS A:</p>
+        <div class="aliados">
+            <span class="aliado-tag">CHEVROLET CAMPESA</span>
+            <span class="aliado-tag">DROGUERÍA ALEMANA</span>
+            <span class="aliado-tag">HOLIDAY INN</span>
+            <span class="aliado-tag">COTELCO SANTANDER</span>
+        </div>
+    </footer>
+
+    <script>
+        // DATA DE LOS 87 MUNICIPIOS
+        const dataMunicipios = [
+            {n: "Aguada", p: "Bocadillo Veleño", d: "Dulce artesanal de guayaba, símbolo de la provincia.", f: "bocadillo.jpg"},
+            {n: "Barichara", p: "Carne Oreada", d: "Carne de res salada y secada al sol, asada a la perfección.", f: "carne.jpg"},
+            {n: "Bucaramanga", p: "Hormigas Culonas", d: "Manjar exótico de origen Guane, tostadas con sal.", f: "hormigas.jpg"},
+            {n: "Barrancabermeja", p: "Bocachico Frito", d: "Pescado fresco del Río Magdalena con patacón y suero.", f: "pescado.jpg"},
+            {n: "Floridablanca", p: "Obleas", d: "Galleta fina rellena de arequipe y dulces tradicionales.", f: "obleas.jpg"},
+            {n: "San Gil", p: "Mute Santandereano", d: "Sopa potente con maíz, carnes y granos.", f: "mute.jpg"},
+            {n: "Vélez", p: "Bocadillo Veleño", d: "Denominación de origen de la mejor guayaba regional.", f: "velez.jpg"},
+            {n: "Zapatoca", p: "Vinos de Fruta", d: "Deliciosos fermentos artesanales en el clima de seda.", f: "vino.jpg"},
+            {n: "Lebrija", p: "Piña Perolera", d: "La piña más dulce de Colombia en postres y jugos.", f: "pina.jpg"},
+            {n: "Piedecuesta", p: "Tamal Santandereano", d: "Envuelto en hoja de bijao con garbanzo y pollo.", f: "tamal.jpg"},
+            {n: "Girón", p: "Caldo con Huevo", d: "Desayuno tradicional en el monumento colonial.", f: "caldo.jpg"},
+            {n: "Málaga", p: "Cabrito al Horno", d: "Carne tierna acompañada de pepitoria.", f: "cabrito.jpg"},
+            // ... El JS generará los otros 75 municipios automáticamente con datos genéricos si no están aquí
+        ];
+
+        // Lista completa de nombres
+        const nombres87 = [
+            "Aguada", "Albania", "Aratoca", "Barbosa", "Barichara", "Barrancabermeja", "Betulia", "Bolívar", "Bucaramanga", 
+            "Cabrera", "California", "Capitanejo", "Carcasí", "Cepitá", "Cerrito", "Charalá", "Charta", "Chima", "Chipatá", 
+            "Cimitarra", "Concepción", "Confines", "Contratación", "Coromoro", "Curití", "El Carmen de Chucurí", "El Guacamayo", 
+            "El Peñón", "El Playón", "Encino", "Enciso", "Florián", "Floridablanca", "Galán", "Gámbita", "Girón", "Guaca", 
+            "Guadalupe", "Guapotá", "Guavatá", "Güepsa", "Hato", "Jesús María", "Jordán", "La Belleza", "La Paz", "Landázuri", 
+            "Lebrija", "Los Santos", "Macaravita", "Málaga", "Matanza", "Mogotes", "Molagavita", "Ocamonte", "Oiba", "Onzaga", 
+            "Palmar", "Palmas del Socorro", "Páramo", "Piedecuesta", "Pinchote", "Puente Nacional", "Puerto Parra", 
+            "Puerto Wilches", "Rionegro", "Sabana de Torres", "San Andrés", "San Benito", "San Gil", "San Joaquín", 
+            "San José de Miranda", "San Miguel", "San Vicente de Chucurí", "Santa Bárbara", "Santa Helena del Opón", 
+            "Simacota", "Socorro", "Suaita", "Sucre", "Suratá", "Tona", "Valle de San José", "Vélez", "Vetas", 
+            "Villanueva", "Zapatoca"
+        ].sort();
+
+        const grid = document.getElementById('mainGrid');
+
+        nombres87.forEach(nombre => {
+            const muniInfo = dataMunicipios.find(d => d.n === nombre) || { p: "Plato Típico Regional", d: "Sabor ancestral santandereano que debes probar.", f: "default.jpg" };
+            const card = document.createElement('div');
+            card.className = 'muni-card';
+            card.innerHTML = `<h4>${nombre}</h4>`;
+            card.onclick = () => openM(nombre, muniInfo);
+            grid.appendChild(card);
+        });
+
+        function openM(nombre, info) {
+            const modal = document.getElementById('muniModal');
+            const content = document.getElementById('modalContent');
+            
+            // Link de Google Maps sin API
+            const mapsLink = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(nombre + ', Santander, Colombia')}`;
+
+            content.innerHTML = `
+                <h2 style="color:var(--verde)">${nombre}</h2>
+                <div class="plato-foto"></div> <h3 style="color:var(--amarillo)">${info.p}</h3>
+                <p>${info.d}</p>
+                <div style="background:#f9f9f9; padding:15px; border-radius:10px; margin:15px 0">
+                    <p style="font-size:0.8rem">Recorre Santander en tu <strong>Chevrolet Campesa</strong>.</p>
+                </div>
+                <a href="${mapsLink}" target="_blank" class="btn-ruta">INICIAR RUTA DESDE MI ORIGEN 📍</a>
+            `;
+            modal.style.display = 'flex';
+        }
+
+        function closeM() { document.getElementById('muniModal').style.display = 'none'; }
+    </script>
+</body>
+</html>
