@@ -3,162 +3,262 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pasaporte Gastronómico | La Vuelta a Santander</title>
+    <title>Pasaporte Gastronómico | Santander 87 Platos</title>
     <style>
         :root {
             --verde: #1a5e3a; /* */
             --amarillo: #f4b400; /* */
             --blanco: #ffffff;
-            --gris-fondo: #f0f2f5;
+            --fondo: #f8f9fa;
         }
 
-        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--gris-fondo); margin: 0; color: #333; }
+        body { font-family: 'Inter', system-ui, sans-serif; margin: 0; background: var(--fondo); color: #333; overflow-x: hidden; }
 
-        /* HEADER & BRANDING */
-        .header { background: var(--blanco); padding: 20px; text-align: center; border-bottom: 5px solid var(--verde); position: sticky; top: 0; z-index: 1000; }
-        .logo { max-width: 180px; height: auto; }
+        /* HEADER & LOGO */
+        header { background: var(--blanco); padding: 20px; text-align: center; border-bottom: 5px solid var(--verde); position: sticky; top: 0; z-index: 1000; }
+        .logo-img { max-width: 180px; height: auto; }
 
-        /* ESPACIO GOOGLE MAPS (UI/UX Team) */
-        .map-wrapper { max-width: 1100px; margin: 20px auto; padding: 0 15px; }
-        .map-container { background: #fff; border-radius: 20px; height: 350px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 2px solid var(--verde); }
+        /* GOOGLE MAPS SECTION */
+        .map-section { max-width: 1100px; margin: 20px auto; padding: 0 15px; }
+        .map-box { background: #fff; border-radius: 25px; height: 300px; overflow: hidden; border: 2px solid var(--verde); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
         iframe { width: 100%; height: 100%; border: none; }
 
-        /* FILTROS POR PROVINCIA */
-        .provincias-tabs { 
-            max-width: 1100px; margin: 30px auto; display: flex; 
-            overflow-x: auto; gap: 10px; padding: 10px 15px;
-            scrollbar-width: none;
-        }
+        /* TABS DE PROVINCIAS (UX IMPROVED) */
+        .tabs-container { max-width: 1100px; margin: 20px auto; overflow-x: auto; display: flex; gap: 10px; padding: 10px 15px; scrollbar-width: none; }
         .tab-btn { 
             background: var(--blanco); border: 2px solid var(--verde); color: var(--verde);
-            padding: 10px 20px; border-radius: 50px; font-weight: bold; cursor: pointer;
+            padding: 12px 24px; border-radius: 50px; font-weight: bold; cursor: pointer;
             white-space: nowrap; transition: 0.3s;
         }
         .tab-btn.active { background: var(--verde); color: var(--blanco); }
 
-        /* GRID DE PASAPORTE (87 Municipios) */
-        .grid-container { max-width: 1100px; margin: 0 auto 50px; padding: 0 15px; }
-        .muni-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        /* GRID DE MUNICIPIOS */
+        .main-content { max-width: 1100px; margin: 0 auto 60px; padding: 0 15px; }
+        .muni-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
         
         .muni-card { 
-            background: var(--blanco); border-radius: 20px; overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eee;
-            transition: 0.3s;
+            background: var(--blanco); border-radius: 20px; padding: 20px; text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.04); border: 1px solid #eee; transition: 0.3s; cursor: pointer;
         }
-        .muni-card:hover { transform: translateY(-5px); border-color: var(--amarillo); }
+        .muni-card:hover { border-color: var(--amarillo); transform: translateY(-5px); }
+        .muni-card h3 { color: var(--verde); margin: 0 0 10px; font-size: 1.2rem; }
+        .muni-card p { color: var(--amarillo); font-weight: bold; font-size: 0.9rem; }
+
+        /* MODAL DE PASAPORTE (UX FOCUS) */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: white; width: 100%; max-width: 480px; border-radius: 30px; padding: 30px; text-align: center; position: relative; border-top: 10px solid var(--amarillo); }
+        .close-btn { position: absolute; right: 20px; top: 15px; font-size: 30px; cursor: pointer; color: #ccc; }
+        .plato-img-placeholder { width: 100%; height: 220px; background: #f0f0f0; border-radius: 20px; margin-bottom: 20px; object-fit: cover; }
         
-        .card-img { width: 100%; height: 160px; background: #ddd; object-fit: cover; }
-        .card-body { padding: 20px; }
-        .card-body h3 { margin: 0; color: var(--verde); font-size: 1.3rem; }
-        .card-body .plato { color: var(--amarillo); font-weight: bold; font-size: 0.9rem; margin: 5px 0; }
-        .card-body .desc { font-size: 0.85rem; color: #666; margin-bottom: 20px; height: 40px; overflow: hidden; }
-        
-        /* BOTÓN DE RUTA DINÁMICA */
         .btn-ruta { 
             display: block; background: var(--amarillo); color: white; text-align: center;
-            padding: 12px; border-radius: 12px; text-decoration: none; font-weight: bold;
-            box-shadow: 0 4px 10px rgba(244,180,0,0.3);
+            padding: 16px; border-radius: 15px; text-decoration: none; font-weight: bold;
+            margin-top: 25px; box-shadow: 0 8px 20px rgba(244,180,0,0.3); transition: 0.3s;
         }
+        .btn-ruta:hover { transform: scale(1.03); }
 
-        /* ALIADOS */
-        .footer { background: var(--verde); color: white; padding: 40px 20px; text-align: center; }
-        .sponsor-list { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; opacity: 0.8; margin-top: 20px; }
-        .sponsor { font-size: 0.75rem; font-weight: bold; border: 1px solid rgba(255,255,255,0.3); padding: 5px 15px; border-radius: 5px; }
+        /* SPONSORS */
+        footer { background: var(--verde); color: white; padding: 40px 20px; text-align: center; }
+        .sponsor-list { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 20px; }
+        .sponsor-badge { border: 1px solid rgba(255,255,255,0.3); padding: 5px 15px; border-radius: 8px; font-size: 0.75rem; }
     </style>
 </head>
 <body>
 
-    <header class="header">
-        <img src="130100.jpg" alt="Logo La Vuelta a Santander" class="logo">
+    <header>
+        <img src="130100.jpg" alt="Logo La Vuelta a Santander" class="logo-img">
     </header>
 
-    <div class="map-wrapper">
-        <div class="map-container">
-            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1012984.7397746187!2d-73.81665675!3d6.8945625!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e683f987979644f%3A0x6e26710b7a808e03!2sSantander!5e0!3m2!1ses!2sco!4v1700000000000!5m2!1ses!2sco"></iframe>
+    <div class="map-section">
+        <div class="map-box">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1979.4636365445217!2d-73.1198!3d7.1193!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e683ee88327cc7f%3A0x6334542168345421!2sSantander!5e0!3m2!1ses!2sco!4v1700000000000"></iframe>
         </div>
     </div>
 
-    <div class="provincias-tabs" id="tabs">
-        <button class="tab-btn active" onclick="filterMuni('todas')">Todas las Provincias</button>
-        <button class="tab-btn" onclick="filterMuni('soto')">Soto</button>
-        <button class="tab-btn" onclick="filterMuni('comunera')">Comunera</button>
-        <button class="tab-btn" onclick="filterMuni('guanenta')">Guanentá</button>
-        <button class="tab-btn" onclick="filterMuni('velez')">Vélez</button>
-        <button class="tab-btn" onclick="filterMuni('garcia-rovira')">García Rovira</button>
-        <button class="tab-btn" onclick="filterMuni('yariguies')">Yariguíes</button>
+    <div class="tabs-container" id="tabs">
+        <button class="tab-btn active" onclick="filterBy('todas')">Todos (87)</button>
+        <button class="tab-btn" onclick="filterBy('Metropolitana')">Metropolitana</button>
+        <button class="tab-btn" onclick="filterBy('Comuneros')">Comuneros</button>
+        <button class="tab-btn" onclick="filterBy('Guanentá')">Guanentá</button>
+        <button class="tab-btn" onclick="filterBy('Vélez')">Vélez</button>
+        <button class="tab-btn" onclick="filterBy('García Rovira')">García Rovira</button>
+        <button class="tab-btn" onclick="filterBy('Mares')">Mares</button>
+        <button class="tab-btn" onclick="filterBy('Carare Opón')">Carare Opón</button>
+        <button class="tab-btn" onclick="filterBy('Soto Norte')">Soto Norte</button>
     </div>
 
-    <div class="grid-container">
+    <div class="main-content">
         <div class="muni-grid" id="grid"></div>
     </div>
 
-    <footer class="footer">
-        <p>EQUIPAMIENTO OFICIAL PARA LA RUTA</p>
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeM()">×</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <footer>
+        <p>RUTA OFICIAL APOYADA POR:</p>
         <div class="sponsor-list">
-            <span class="sponsor">CHEVROLET CAMPESA</span>
-            <span class="sponsor">DROGUERÍA ALEMANA</span>
-            <span class="sponsor">HOLIDAY INN</span>
-            <span class="sponsor">COTELCO</span>
+            <span class="sponsor-badge">CHEVROLET CAMPESA</span>
+            <span class="sponsor-badge">DROGUERÍA ALEMANA</span>
+            <span class="sponsor-badge">HOLIDAY INN</span>
+            <span class="sponsor-badge">COTELCO</span>
+            <span class="sponsor-badge">EL CUCHARÓN VIAJERO</span>
         </div>
     </footer>
 
     <script>
-        // Los 87 Municipios organizados por Provincias
+        // BASE DE DATOS COMPLETA 87 MUNICIPIOS
         const municipios = [
-            // SOTO
-            { n: "Bucaramanga", p: "soto", plato: "Hormigas Culonas", d: "El manjar exótico más famoso de la capital." },
-            { n: "Floridablanca", p: "soto", plato: "Obleas", d: "El postre tradicional que endulza la ruta." },
-            { n: "Piedecuesta", p: "soto", plato: "Tamal Santandereano", d: "Con garbanzo y el secreto de la casa." },
-            
-            // GUANENTÁ
-            { n: "San Gil", p: "guanenta", plato: "Mute", d: "Sopa potente para recuperar energía." },
-            { n: "Barichara", p: "guanenta", plato: "Carne Oreada", d: "Sabor ancestral secado al sol del cañón." },
-            
-            // VÉLEZ
-            { n: "Vélez", p: "velez", plato: "Bocadillo Veleño", d: "Dulce de guayaba con denominación de origen." },
-            { n: "Barbosa", p: "velez", plato: "Arequipe", d: "Tradición lechera del sur de Santander." },
+            // METROPOLITANA (9)
+            {n:"Bucaramanga", r:"Metropolitana", p:"Hormigas Culonas", d:"El manjar ancestral de los Guanes."},
+            {n:"Floridablanca", r:"Metropolitana", plato:"Obleas", d:"Dulzura tradicional en cada capa."},
+            {n:"Girón", r:"Metropolitana", p:"Caldo con Huevo", d:"El despertar colonial de Santander."},
+            {n:"Piedecuesta", r:"Metropolitana", p:"Tamal Piedecuestano", d:"Masa de maíz pelao con el toque de la casa."},
+            {n:"Lebrija", r:"Metropolitana", p:"Piña Perolera", d:"La fruta más dulce de la región."},
+            {n:"Los Santos", r:"Metropolitana", p:"Arepa de Maíz Pelao", d:"Sabor a tierra y fogón de leña."},
+            {n:"Santa Bárbara", r:"Metropolitana", p:"Papas Chorreadas", d:"Tradición de montaña y cultivos frescos."},
+            {n:"Rionegro", r:"Metropolitana", p:"Cacao Artesanal", d:"El chocolate más puro de la zona soto."},
+            {n:"Zapatoca", r:"Metropolitana", p:"Cocuy", d:"Bebida ancestral en el clima de seda."},
 
-            // YARIGUÍES
-            { n: "Barrancabermeja", p: "yariguies", plato: "Bocachico Frito", d: "Sabor a río Magdalena en la capital petrolera." }
-            
-            // (El sistema cargará los otros 79 municipios automáticamente)
-        ];
+            // COMUNEROS (15)
+            {n:"Socorro", r:"Comuneros", p:"Pepitoria", d:"Sabor histórico en la capital comunera."},
+            {n:"Chima", r:"Comuneros", p:"Sancocho", d:"El plato de los domingos campesinos."},
+            {n:"Hato", r:"Comuneros", p:"Sopa de Avena", d:"Energía pura para el campo."},
+            {n:"Confines", r:"Comuneros", p:"Mute", d:"Sopa espesa con variedad de granos."},
+            {n:"Oiba", r:"Comuneros", p:"Arepas Carisecas", d:"Tostadas y únicas de la región."},
+            {n:"Contratación", r:"Comuneros", p:"Dulce de Arroz", d:"Suavidad que cuenta historias de resiliencia."},
+            {n:"Palmar", r:"Comuneros", p:"Pescado de Río", d:"Frescura directa de las cuencas locales."},
+            {n:"El Guacamayo", r:"Comuneros", p:"Chorizo Ahumado", d:"Tradición cárnica de la provincia."},
+            {n:"Simacota", r:"Comuneros", p:"Sopa de Chorotas", d:"Bolas de maíz rellenas de sabor."},
+            {n:"Galán", r:"Comuneros", p:"Panela", d:"El oro dulce de los trapiches."},
+            {n:"Gámbita", r:"Comuneros", p:"Dulce de Guayaba", d:"Tierra de Luis A. Calvo y grandes sabores."},
+            {n:"Suaita", r:"Comuneros", p:"Masato", d:"Bebida fermentada para celebrar."},
+            {n:"Guadalupe", r:"Comuneros", p:"Carne Oreada", d:"Secada al sol de los pozos naturales."},
+            {n:"Palmas del Socorro", r:"Comuneros", p:"Cabrito", d:"Especialidad al horno de la provincia."},
+            {n:"Guapotá", r:"Comuneros", p:"Chicha", d:"Herencia indígena en cada sorbo."},
+
+            // GUANENTÁ (18)
+            {n:"San Gil", r:"Guanentá", p:"Mute Santandereano", d:"La sopa más completa del departamento."},
+            {n:"Aratoca", r:"Guanentá", p:"Pan de Yuca", d:"Parada obligatoria en el Chicamocha."},
+            {n:"Barichara", r:"Guanentá", p:"Cabrito", d:"Sabor del pueblo más lindo de Colombia."},
+            {n:"Cabrera", r:"Guanentá", p:"Fritanga", d:"Variedad de carnes y tubérculos fritos."},
+            {n:"Cepitá", r:"Guanentá", p:"Cabro", d:"Criado en las laderas del cañón."},
+            {n:"Coromoro", r:"Guanentá", p:"Tamal", d:"Envuelto en hoja para máximo aroma."},
+            {n:"Curití", r:"Guanentá", p:"Carne Oreada", d:"Sabor que nace entre tejedores de fique."},
+            {n:"Charalá", r:"Guanentá", p:"Sopa de Ramo", d:"Herencia de libertad y sabor campesino."},
+            {n:"Encino", r:"Guanentá", p:"Trucha", d:"Pescado fresco de alta montaña."},
+            {n:"Jordán", r:"Guanentá", p:"Cabro Sudado", d:"Delicia en el municipio más caluroso."},
+            {n:"Mogotes", r:"Guanentá", p:"Bocadillo", d:"Dulce tradicional de la provincia."},
+            {n:"Ocamonte", r:"Guanentá", p:"Café", d:"Taza de excelencia de las montañas."},
+            {n:"Páramo", r:"Guanentá", p:"Miel con Queso", d:"Combinación perfecta de la región."},
+            {n:"Pinchote", r:"Guanentá", p:"Ajiaco", d:"Versión santandereana de este clásico."},
+            {n:"San Joaquín", r:"Guanentá", p:"Hormigas", d:"Tradición Guane recolectada a mano."},
+            {n:"Valle de San José", r:"Guanentá", p:"Chorizo", d:"Los embutidos más famosos del Valle."},
+            {n:"Villanueva", r:"Guanentá", p:"Arepa Amarilla", d:"Maíz pelao con chicharrón molido."},
+            {n:"Onzaga", r:"Guanentá", p:"Cabrito Frito", d:"Textura crujiente y jugosa."},
+
+            // GARCÍA ROVIRA (12)
+            {n:"Málaga", r:"García Rovira", p:"Cabrito", d:"El rey de la mesa en la capital rovirense."},
+            {n:"Capitanejo", r:"García Rovira", p:"Cabrito Frito", d:"Famoso por su preparación única."},
+            {n:"Carcasí", r:"García Rovira", p:"Sopa de Maíz", d:"Sabor ancestral del oriente."},
+            {n:"Cerrito", r:"García Rovira", p:"Caldo de Papa", d:"Calor hogareño contra el frío del páramo."},
+            {n:"Concepción", r:"García Rovira", p:"Trucha", d:"Pescado de las frías aguas de montaña."},
+            {n:"Enciso", r:"García Rovira", p:"Dulce de Frutas", d:"Frutos de la tierra en melado natural."},
+            {n:"Guaca", r:"García Rovira", p:"Tamal", d:"Versión de alta montaña del clásico plato."},
+            {n:"Macaravita", r:"García Rovira", p:"Carne Oreada", d:"Secado tradicional en las alturas."},
+            {n:"Molagavita", r:"García Rovira", p:"Sancocho", d:"Plato generoso para el caminante."},
+            {n:"San Andrés", r:"García Rovira", p:"Cabro", d:"Sabor auténtico de la provincia."},
+            {n:"San José de Miranda", r:"García Rovira", p:"Mute", d:"Sopa reconfortante de la montaña."},
+            {n:"San Miguel", r:"García Rovira", p:"Arepa Amarilla", d:"El pan de cada día rovirense."},
+
+            // MARES (6)
+            {n:"Barrancabermeja", r:"Mares", p:"Bocachico Frito", d:"Sabor a río con patacón y suero."},
+            {n:"Betulia", r:"Mares", p:"Arroz con Coco", d:"Herencia ribereña en la mesa."},
+            {n:"El Carmen de Chucurí", r:"Mares", p:"Cacao", d:"El corazón cacaotero de Santander."},
+            {n:"Puerto Wilches", r:"Mares", p:"Pescado Guisado", d:"Sazón del Magdalena Medio."},
+            {n:"Sabana de Torres", r:"Mares", p:"Sancocho de Pescado", d:"Mezcla de sabores de río y campo."},
+            {n:"San Vicente de Chucurí", r:"Mares", p:"Chocolate", d:"La capital mundial del cacao."},
+
+            // VÉLEZ (16)
+            {n:"Vélez", r:"Vélez", p:"Bocadillo Veleño", d:"Símbolo nacional en hoja de bijao."},
+            {n:"Aguada", r:"Vélez", p:"Bocadillo", d:"Dulzura artesanal de la provincia."},
+            {n:"Barbosa", r:"Vélez", p:"Arequipe", d:"El centro del dulce en el sur."},
+            {n:"Chipatá", r:"Vélez", p:"Maíz Tostado", d:"Sabor del primer pueblo fundado."},
+            {n:"Florián", r:"Vélez", p:"Pescado", d:"De las aguas de las Ventanas del Tisquizoque."},
+            {n:"Güepsa", r:"Vélez", p:"Panela", d:"Motor económico y dulce regional."},
+            {n:"La Belleza", r:"Vélez", p:"Trucha", d:"Pescado de aguas cristalinas."},
+            {n:"Puente Nacional", r:"Vélez", p:"Copete", d:"Dulzura para acompañar el bocadillo."},
+            {n:"Sucre", r:"Vélez", p:"Carne Oreada", d:"Secada al sol veleño."},
+            {n:"Albania", r:"Vélez", p:"Sopa de Arroz", d:"Tradición campesina nutritiva."},
+            {n:"Bolívar", r:"Vélez", p:"Piquete", d:"El almuerzo del trabajador del campo."},
+            {n:"El Peñón", r:"Vélez", p:"Caldo", d:"Energía para la zona montañosa."},
+            {n:"Guavatá", r:"Vélez", p:"Guayaba", d:"La mejor fruta para el mejor dulce."},
+            {n:"Jesús María", r:"Vélez", p:"Tamal", d:"El sabor del desayuno veleño."},
+            {n:"La Paz", r:"Vélez", p:"Miel", d:"Pureza de los bosques naturales."},
+            {n:"San Benito", r:"Vélez", p:"Sancocho", d:"Sabor a hogar campesino."},
+
+            // CARARE OPÓN (4)
+            {n:"Cimitarra", r:"Carare Opón", p:"Sancocho", d:"Abundancia de la selva húmeda."},
+            {n:"Landázuri", r:"Carare Opón", p:"Cacao", d:"Chocolate con aroma a bosque tropical."},
+            {n:"Santa Helena del Opón", r:"Carare Opón", p:"Pescado", d:"Frescura de las cuencas del Opón."},
+            {n:"Puerto Parra", r:"Carare Opón", p:"Bocachico", d:"Sabor ribereño y ganadero."},
+
+            // SOTO NORTE (7)
+            {n:"Matanza", r:"Soto Norte", p:"Dulce de Leche", d:"Tradición de la zona minera."},
+            {n:"California", r:"Soto Norte", p:"Pizza de Mortiño", d:"Fruto del páramo hecho delicia."},
+            {n:"Charta", r:"Soto Norte", p:"Sopa de Ruyas", d:"Receta ancestral de clima frío."},
+            {n:"El Playón", r:"Soto Norte", p:"Sancocho", d:"Sabor del corredor hacia el Caribe."},
+            {n:"Suratá", r:"Soto Norte", p:"Queso de Hoja", d:"Suavidad de la montaña soto."},
+            {n:"Tona", r:"Soto Norte", p:"Trucha", d:"Pescado fresco del páramo de Berlín."},
+            {n:"Vetas", r:"Soto Norte", p:"Caldo de Papas", d:"Energía para el municipio más alto."}
+        ].sort((a,b) => a.n.localeCompare(b.n));
 
         const grid = document.getElementById('grid');
+        const modal = document.getElementById('modal');
 
-        function renderCards(data) {
+        function renderGrid(filter = 'todas') {
             grid.innerHTML = "";
+            const data = filter === 'todas' ? municipios : municipios.filter(m => m.r === filter);
             data.forEach(m => {
-                const urlMaps = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(m.n + ', Santander, Colombia')}`;
-                grid.innerHTML += `
-                    <div class="muni-card">
-                        <div class="card-img"></div>
-                        <div class="card-body">
-                            <h3>${m.n}</h3>
-                            <p class="plato">Plato: ${m.plato}</p>
-                            <p class="desc">${m.d}</p>
-                            <a href="${urlMaps}" target="_blank" class="btn-ruta">INICIAR RUTA (Origen Automático) 📍</a>
-                        </div>
-                    </div>
-                `;
+                const card = document.createElement('div');
+                card.className = 'muni-card';
+                card.innerHTML = `<h3>${m.n}</h3><p>${m.p || 'Plato Típico'}</p>`;
+                card.onclick = () => openM(m);
+                grid.appendChild(card);
             });
         }
 
-        function filterMuni(provincia) {
-            // Actualizar Tabs
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-
-            if(provincia === 'todas') {
-                renderCards(municipios);
-            } else {
-                const filtrados = municipios.filter(m => m.p === provincia);
-                renderCards(filtrados);
-            }
+        function openM(m) {
+            const body = document.getElementById('modalBody');
+            const dest = encodeURIComponent(m.n + ", Santander, Colombia");
+            const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${dest}`;
+            
+            body.innerHTML = `
+                <h2 style="color:var(--verde)">${m.n}</h2>
+                <div class="plato-img-placeholder"></div>
+                <h3 style="color:var(--amarillo)">${m.p || 'Plato Típico'}</h3>
+                <p>${m.d || 'Descubre el secreto gastronómico de este municipio junto a Darwin Durán.'}</p>
+                <div style="background:#f9f9f9; padding:15px; border-radius:15px; margin:20px 0; border: 1px dashed #ddd;">
+                    <p style="font-size:0.8rem; color:#666;">Ruta recomendada para la pickup de <strong>Campesa Chevrolet</strong>.</p>
+                </div>
+                <a href="${mapsUrl}" target="_blank" class="btn-ruta">INICIAR RUTA DESDE MI ORIGEN 📍</a>
+            `;
+            modal.style.display = 'flex';
         }
 
-        // Carga inicial
-        renderCards(municipios);
+        function closeM() { modal.style.display = 'none'; }
+        
+        function filterBy(region) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderGrid(region);
+        }
+
+        window.onclick = (e) => { if (e.target == modal) closeM(); };
+        renderGrid();
     </script>
 </body>
 </html>
